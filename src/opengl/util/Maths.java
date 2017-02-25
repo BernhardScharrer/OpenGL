@@ -24,6 +24,20 @@ public class Maths {
 		return matrix;
 	}
 	
+	public static Matrix4f createTM(int x, int y) {
+		matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(new Vector3f(), matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(0), Maths.x, matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(0), Maths.y, matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(0), Maths.z, matrix, matrix);
+		Maths.scale.x = 1;
+		Maths.scale.y = 1;
+		Maths.scale.z = 1;
+		Matrix4f.scale(Maths.scale, matrix, matrix);
+		return matrix;
+	}
+	
     public static Matrix4f createVM() {
 		Matrix4f viewMatrix = new Matrix4f();
 		viewMatrix.setIdentity();

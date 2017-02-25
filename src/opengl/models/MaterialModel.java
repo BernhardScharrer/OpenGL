@@ -21,5 +21,10 @@ public class MaterialModel extends Model {
 	public Material[] getMaterials() {
 		return materials;
 	}
+
+	@Override
+	protected VAO createModel(float[]... files) {
+		return null;
+	}
 	
 }

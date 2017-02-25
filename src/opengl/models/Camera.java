@@ -1,6 +1,6 @@
 package opengl.models;
 
-import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -9,8 +9,8 @@ import opengl.util.Maths;
 
 public class Camera {
 	
-	public static Vector3f location = new Vector3f(0,0,1);
-	private static float pitch, yaw, roll;
+	public static Vector3f location = new Vector3f(0,1,0);
+	private static float pitch=90, yaw=0, roll;
 	
 	private static final float FOV = 10;
 	private static final float NEAR_PLANE = 0.1f;
@@ -18,7 +18,7 @@ public class Camera {
 	private static Matrix4f PM;
 	
 	public static void generatePM() {
-		float aspectRatio = (float) 1000 / (float) 1000;
+		float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
 		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOV / 2f))) * aspectRatio);
 		float x_scale = y_scale / aspectRatio;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
@@ -33,7 +33,6 @@ public class Camera {
 	}
 	
 	public static void update() {
-		System.out.println(location.x + "|" + location.y + "|" + location.z);
 		if (KeyBoard.isKeyPressed(KeyBoard.KEY_W)) {
 			location.x += 0.02f * Math.cos(Math.toRadians(yaw-90));
 			location.z += 0.02f * Math.sin(Math.toRadians(yaw-90));

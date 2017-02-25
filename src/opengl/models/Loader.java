@@ -16,8 +16,6 @@ import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
-import opengl.util.Color;
-
 public class Loader {
 	
 	protected static int loadTexture(String file) {
@@ -47,58 +45,12 @@ public class Loader {
 	}
 	
 	protected static VAO loadMaterialModel(String file) {
-		return new ModelLoader().loadMaterialModel(file);
+		return MaterialLoader.load(file);
 	}
 	
-	private static class MaterialLoader {
+	protected static VAO loadChunkModel(String file) {
 		
-		private BufferedReader reader;
-		private String line;
-		
-		private List<Material> materials;
-		private Material[] material_array;
-		private Material current;
-		
-		private int id;
-		
-		public Material[] loadMaterials(String file) {
-			
-			try {
-				
-				materials = new ArrayList<>();
-				reader = new BufferedReader(new FileReader(new File("res/"+file+".mtl")));
-				
-				while ((line = reader.readLine()) != null) {
-					if (line.startsWith("newmtl ")) {
-						current = new Material(id++, line.split(" ")[1], null);
-						materials.add(current);
-					}
-					
-					if (line.startsWith("Kd ")) {
-						if (current != null) {
-							current.setColor(new Color(
-									Float.parseFloat(line.split(" ")[1]), 
-									Float.parseFloat(line.split(" ")[2]), 
-									Float.parseFloat(line.split(" ")[3]))
-								);
-						}
-					}
-					
-				}
-				
-				material_array = new Material[materials.size()];
-				for (int n = 0;n < materials.size();n++) {
-					material_array[n] = materials.get(n);
-				}
-				
-				reader.close();
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			return material_array;
-		}
+		return null;
 		
 	}
 	
@@ -114,7 +66,6 @@ public class Loader {
 		private float[] vertices_array = null;
 		private float[] textures_array = null;
 		private float[] normals_array = null;
-		private int[] material = null;
 		private int[] indices_array = null;
 		private int cvp;
 		private String line;
@@ -210,93 +161,6 @@ public class Loader {
 			return vao;
 		}
 		
-		/*
-		 * load model with materials
-		 */
-		public VAO loadMaterialModel(String file) {
-			try {
-				reader = new BufferedReader(new FileReader(new File("res/"+file+".obj")));
-				int material_id = -1;
-				
-				while(true) {
-					line = reader.readLine();
-					if (line!=null) {
-						current = line.split(" ");
-						if (line.startsWith("v ")) {
-							vertex = new Vector3f(
-								Float.parseFloat(current[1]),
-								Float.parseFloat(current[2]),
-								Float.parseFloat(current[3])	
-							);
-							vertices.add(vertex);
-						} else if (line.startsWith("vn ")) {
-							normal = new Vector3f(
-									Float.parseFloat(current[1]),
-									Float.parseFloat(current[2]),
-									Float.parseFloat(current[3])	
-								);
-							normals.add(normal);
-						} else if (line.startsWith("f ")) {
-							material = new int[vertices.size()];
-							normals_array = new float[vertices.size()*3];
-							break;
-						}
-					}
-				}
-				
-				do {
-					if (line.startsWith("usemtl ")) {
-						material_id++;
-					}
-					if (line.startsWith("f ")) {
-						current = line.split(" ");
-						vertex1 = current[1].split("//");
-						vertex2 = current[2].split("//");
-						vertex3 = current[3].split("//");
-						
-						processVertexWithoutTexture(vertex1, indices, material_id, normals, material, normals_array);
-						processVertexWithoutTexture(vertex2, indices, material_id, normals, material, normals_array);
-						processVertexWithoutTexture(vertex3, indices, material_id, normals, material, normals_array);
-					}
-				} while ((line=reader.readLine()) != null);
-				
-				reader.close();
-				
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			vertices_array = new float[vertices.size()*3];
-			indices_array = new int[indices.size()];
-			
-			cvp = 0;
-			
-			for (Vector3f vertex : vertices) {
-				vertices_array[cvp++] = vertex.x;
-				vertices_array[cvp++] = vertex.y;
-				vertices_array[cvp++] = vertex.z;
-			}
-			
-			for (cvp = 0;cvp<indices.size();cvp++) indices_array[cvp] = indices.get(cvp);
-			
-			int id = GL30.glGenVertexArrays();
-			Models.vaos.add(id);
-			GL30.glBindVertexArray(id);
-			
-			VBO indices = new VBO(indices_array);
-			VBO vertices = new VBO(0, 3, vertices_array);
-			VBO materials = new VBO(1, 1, material);
-			VBO normals = new VBO(2, 3, normals_array);
-			
-			GL30.glBindVertexArray(0);
-			
-			VAO vao = new VAO(id, vertices.getCount(), indices, vertices, materials, normals);
-			
-			return vao;
-		}
-
 		private void processVertex(String[] vertexdata, List<Integer> indices, List<Vector2f> textures, List<Vector3f> normals, float[] textures_array, float[] normals_array) {
 			
 			cvp = Integer.parseInt(vertexdata[0])-1;
@@ -305,18 +169,6 @@ public class Loader {
 			textures_array[cvp*2] = texture.x;
 			textures_array[cvp*2+1] = 1-texture.y;
 			normal = normals.get(Integer.parseInt(vertexdata[2])-1);
-			normals_array[cvp*3] = normal.x;
-			normals_array[cvp*3+1] = normal.y;
-			normals_array[cvp*3+2] = normal.z;
-			
-		}
-		
-		private void processVertexWithoutTexture(String[] vertexdata, List<Integer> indices, int material_id, List<Vector3f> normals, int[] material, float[] normals_array) {
-			
-			cvp = Integer.parseInt(vertexdata[0])-1;
-			indices.add(cvp);
-			material[cvp] = material_id;
-			normal = normals.get(Integer.parseInt(vertexdata[1])-1);
 			normals_array[cvp*3] = normal.x;
 			normals_array[cvp*3+1] = normal.y;
 			normals_array[cvp*3+2] = normal.z;

@@ -17,5 +17,10 @@ public class TextureModel extends Model{
 		this.tex = new Texture(files[1]);
 		return Loader.loadTexturedModel(files[0]);
 	}
+
+	@Override
+	protected VAO createModel(float[]... files) {
+		return null;
+	}
 	
 }

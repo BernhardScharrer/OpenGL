@@ -8,10 +8,15 @@ public abstract class Model {
 		vao = loadModel(files);
 	}
 	
+	public Model(float[]... data) {
+		vao = createModel(data);
+	}
+	
 	public VAO getVAO() {
 		return vao;
 	}
 
 	protected abstract VAO loadModel(String... files);
+	protected abstract VAO createModel(float[]... files);
 	
 }

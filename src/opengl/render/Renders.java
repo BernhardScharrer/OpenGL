@@ -16,7 +16,8 @@ public class Renders {
 		Camera.generatePM();
 		
 //		renders.add(new TextureModelRender());
-		renders.add(new EntityRender());
+		renders.add(new ChunkRender());
+//		renders.add(new EntityRender());
 	}
 	
 	public static void update() {
